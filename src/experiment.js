@@ -26,7 +26,20 @@ const debugObj = {};
 const scene = new THREE.Scene();
 
 // textures
+const textureLoader = new THREE.TextureLoader();
 
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+const environmentalMapTexture = cubeTextureLoader.load(
+    [
+        '/textures/environmentMaps/0/px.png',
+        '/textures/environmentMaps/0/nx.png',
+        '/textures/environmentMaps/0/py.png',
+        '/textures/environmentMaps/0/ny.png',
+        '/textures/environmentMaps/0/pz.png',
+        '/textures/environmentMaps/0/nz.png',
+    ]
+)
 
 // Sounds
 
@@ -41,27 +54,22 @@ const scene = new THREE.Scene();
 
 // Elems
 
-const geometry = new THREE.PlaneBufferGeometry(1,1,32,32);
-const material = new THREE.RawShaderMaterial({
-    vertexShader: `
-    uniform mat4 projectionMatrix;
-    uniform mat4 viewMatrix;
-    uniform mat4 modelMatrix;
 
-    attribute vec3 position;
-    void main() {
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-    }
-    `,
-    fragmentShader: `
-    precision mediump float;
-    void main() {
-        gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-    }
-    `
-})
-const mesh = new THREE.Mesh(geometry,material);
-scene.add(mesh);
+
+const cylinder = new THREE.Mesh(
+    new THREE.CylinderBufferGeometry(0,1,1,6,3,false),
+    new THREE.MeshStandardMaterial({
+        color: '#77ff77',
+        metalness: 0.2,
+        roughness: 0.1,
+        envMap: environmentalMapTexture
+    })
+)
+cylinder.receiveShadow = true;
+
+
+scene.add(cylinder);
+
 
 
 // lights 
@@ -81,6 +89,7 @@ scene.add(directionalLight);
 
 
 // Raycaster
+const raycaster = new THREE.Raycaster()
 
 
 
@@ -106,15 +115,16 @@ window.addEventListener("mousemove", (e) => {
 
 //camera 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.0001, 10);
-camera.position.z = 1.5;
-camera.position.y = 0.2;
-camera.position.x = 0.5;
+camera.position.z = 5;
+camera.position.y = 5;
+camera.position.x = 3;
 const control = new OrbitControls(camera, canvas)
 control.enableDamping = true;
 scene.add(camera);
 
+gsap.to(camera.position, 4, {x: 1, y: 12, z: 0.3 })
 
-
+gsap.to(cylinder.position, 20, {x: 0, y: 20});
 
 //render
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true});
@@ -124,7 +134,7 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 //utils 
-
+const objectToUpdate = []
 
 const clock = new THREE.Clock();
 
