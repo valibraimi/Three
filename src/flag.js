@@ -5,8 +5,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import * as dat from 'dat.gui';
 import * as CANNON from 'cannon-es';
 import { CubeTextureLoader } from "three";
-import testVertexShader from './shaders/test2/vertex.glsl';
-import testFregmentShader from './shaders/test2/fragment.glsl';
+import testVertexShader from './shaders/test/vertex.glsl';
+import testFregmentShader from './shaders/test/fragment.glsl';
 const canvas = document.querySelector('.webgl');
 
 
@@ -28,6 +28,7 @@ const scene = new THREE.Scene();
 // textures
 const textureLoader = new THREE.TextureLoader();
 
+const flag = textureLoader.load('/textures/albania-flag.png')
 // Sounds
 
 
@@ -41,17 +42,32 @@ const textureLoader = new THREE.TextureLoader();
 
 // Elems
 
-const geometry = new THREE.PlaneBufferGeometry(1,1,32,32);
+const geometry = new THREE.PlaneBufferGeometry(1,1,100,100);
 
-console.log(geometry.attributes);
+const count = geometry.attributes.position.count;
+
+const randoms = new Float32Array(count);
+
+for (let i=0; i < count; i++) {
+    randoms[i] = Math.random();
+}
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
 
 const material = new THREE.RawShaderMaterial({
     vertexShader: testVertexShader,
     fragmentShader: testFregmentShader,
-    side: THREE.DoubleSide
+    wireframe: true,
+    uniforms: 
+    {
+       uFrequency: { value: new THREE.Vector2(10,5) },
+       uTime: {value: 0},
+       uColor: {value: new THREE.Color('orange')},
+       uTexture: {value: flag}
+    }
 })
 
-
+gui.add(material.uniforms.uFrequency.value, 'x').min(0).max(20)
+gui.add(material.uniforms.uFrequency.value, 'y').min(0).max(20)
 
 const mesh = new THREE.Mesh(geometry,material);
 mesh.scale.y = 2 / 2;
@@ -126,6 +142,9 @@ const tick = () => {
     control.update();
     // Clock
     const elapsedTime = clock.getElapsedTime()
+
+    material.uniforms.uTime.value = elapsedTime;
+
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(tick);
