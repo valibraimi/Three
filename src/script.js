@@ -5,8 +5,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import * as dat from 'dat.gui';
 import * as CANNON from 'cannon-es';
 import { CubeTextureLoader } from "three";
-
-
+import testVertexShader from './shaders/test/vertex.glsl';
+import testFregmentShader from './shaders/test/fragment.glsl';
 const canvas = document.querySelector('.webgl');
 
 
@@ -43,22 +43,8 @@ const scene = new THREE.Scene();
 
 const geometry = new THREE.PlaneBufferGeometry(1,1,32,32);
 const material = new THREE.RawShaderMaterial({
-    vertexShader: `
-    uniform mat4 projectionMatrix;
-    uniform mat4 viewMatrix;
-    uniform mat4 modelMatrix;
-
-    attribute vec3 position;
-    void main() {
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-    }
-    `,
-    fragmentShader: `
-    precision mediump float;
-    void main() {
-        gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-    }
-    `
+    vertexShader: testVertexShader,
+    fragmentShader: testFregmentShader
 })
 const mesh = new THREE.Mesh(geometry,material);
 scene.add(mesh);
