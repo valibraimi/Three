@@ -26,8 +26,9 @@ const debugObj = {};
 const scene = new THREE.Scene();
 
 // textures
+const textureLoader = new THREE.TextureLoader();
 
-
+const flag = textureLoader.load('/textures/albania-flag.png')
 // Sounds
 
 
@@ -41,12 +42,35 @@ const scene = new THREE.Scene();
 
 // Elems
 
-const geometry = new THREE.PlaneBufferGeometry(1,1,32,32);
+const geometry = new THREE.PlaneBufferGeometry(1,1,100,100);
+
+const count = geometry.attributes.position.count;
+
+const randoms = new Float32Array(count);
+
+for (let i=0; i < count; i++) {
+    randoms[i] = Math.random();
+}
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+
 const material = new THREE.RawShaderMaterial({
     vertexShader: testVertexShader,
-    fragmentShader: testFregmentShader
+    fragmentShader: testFregmentShader,
+    wireframe: true,
+    uniforms: 
+    {
+       uFrequency: { value: new THREE.Vector2(10,5) },
+       uTime: {value: 0},
+       uColor: {value: new THREE.Color('orange')},
+       uTexture: {value: flag}
+    }
 })
+
+gui.add(material.uniforms.uFrequency.value, 'x').min(0).max(20)
+gui.add(material.uniforms.uFrequency.value, 'y').min(0).max(20)
+
 const mesh = new THREE.Mesh(geometry,material);
+mesh.scale.y = 2 / 2;
 scene.add(mesh);
 
 
@@ -118,6 +142,9 @@ const tick = () => {
     control.update();
     // Clock
     const elapsedTime = clock.getElapsedTime()
+
+    material.uniforms.uTime.value = elapsedTime;
+
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(tick);

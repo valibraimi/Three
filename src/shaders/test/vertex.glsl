@@ -1,7 +1,34 @@
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
+uniform vec2 uFrequency;
+uniform float uTime;
+
 attribute vec3 position;
+attribute vec2 uv;
+
+varying vec2 vUv;
+varying float vElevation;
+
+
 void main() {
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+    float elvation =  sin(modelPosition.x * uFrequency.x - uTime) * 0.1;
+    elvation += sin(modelPosition.y * uFrequency.y - uTime) * 0.1;
+
+    modelPosition.z += elvation;
+
+    modelPosition.z += sin(modelPosition.x * uFrequency.x - uTime) * 0.1;
+    modelPosition.z += sin(modelPosition.y * uFrequency.y - uTime)  * 0.1;
+
+
+    vec4 viewPosition = viewMatrix * modelPosition;
+    vec4 projectedPosition = projectionMatrix * viewPosition;
+
+   
+    vUv = uv;
+    vElevation = elvation;
+
+    gl_Position = projectedPosition;
 }
